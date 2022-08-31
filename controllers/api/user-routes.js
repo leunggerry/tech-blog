@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { User, Post, Comment, Vote } = require("../../models");
+const { User, Post, Comment } = require("../../models");
 const withAuth = require("../../utils/auth");
 
 // get all users
@@ -23,7 +23,7 @@ router.get("/:id", (req, res) => {
     include: [
       {
         model: Post,
-        attributes: ["id", "title", "post_url", "created_at"],
+        attributes: ["id", "title", "blog_text", "created_at"],
       },
       {
         model: Comment,
@@ -33,12 +33,12 @@ router.get("/:id", (req, res) => {
           attributes: ["title"],
         },
       },
-      {
-        model: Post,
-        attributes: ["title"],
-        through: Vote,
-        as: "voted_posts",
-      },
+      // {
+      //   model: Post,
+      //   attributes: ["title"],
+      //   through: Vote,
+      //   as: "voted_posts",
+      // },
     ],
   })
     .then((dbUserData) => {
@@ -69,26 +69,26 @@ router.post("/", (req, res) => {
     });
 });
 
-router.post("/login", (req, res) => {
-  // expects {username: 'lernantino', password: 'password1234'}
-  User.findOne({
-    where: {
-      username: req.body.username,
-    },
-  }).then((dbUserData) => {
-    if (!dbUserData) {
-      res.status(400).json({ message: "No user with that username address!" });
-      return;
-    }
+// router.post("/login", (req, res) => {
+//   // expects {username: 'lernantino', password: 'password1234'}
+//   User.findOne({
+//     where: {
+//       username: req.body.username,
+//     },
+//   }).then((dbUserData) => {
+//     if (!dbUserData) {
+//       res.status(400).json({ message: "No user with that username address!" });
+//       return;
+//     }
 
-    const validPassword = dbUserData.checkPassword(req.body.password);
+//     const validPassword = dbUserData.checkPassword(req.body.password);
 
-    if (!validPassword) {
-      res.status(400).json({ message: "Incorrect password!" });
-      return;
-    }
-  });
-});
+//     if (!validPassword) {
+//       res.status(400).json({ message: "Incorrect password!" });
+//       return;
+//     }
+//   });
+// });
 
 // router.post("/logout", withAuth, (req, res) => {
 //   if (req.session.loggedIn) {
@@ -100,7 +100,7 @@ router.post("/login", (req, res) => {
 //   }
 // });
 
-router.put("/:id", withAuth, (req, res) => {
+router.put("/:id", (req, res) => {
   // expects {username: 'Lernantino', username: 'lernantino@gmail.com', password: 'password1234'}
 
   // pass in req.body instead to only update what's passed through
@@ -123,7 +123,7 @@ router.put("/:id", withAuth, (req, res) => {
     });
 });
 
-router.delete("/:id", withAuth, (req, res) => {
+router.delete("/:id", (req, res) => {
   User.destroy({
     where: {
       id: req.params.id,
